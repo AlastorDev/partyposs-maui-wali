@@ -1,0 +1,12 @@
+{
+  "name": "partyposs-maui-wali",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A touch-first PartyPoss catching game with the Maui Wali move.",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/core.test.mjs",
+    "check": "node --check dist/game.js && node --check dist/core.js && node --check dist/sw.js"
+  }
+}
