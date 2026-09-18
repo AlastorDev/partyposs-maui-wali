@@ -1,7 +1,7 @@
 {
-  "name": "PartyPoss · Maui Wali",
-  "short_name": "PartyPoss",
-  "description": "A little birthday catching magic.",
+  "name": "Wood Badge · Critter Quest",
+  "short_name": "Critter Quest",
+  "description": "Catch the patrol critters. Explore the woodland. Earn your badges.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,5 +1,5 @@
-const CACHE='partyposs-v1';
-const FILES=['./','./index.html','./style.css','./game.js','./core.js','./manifest.webmanifest','./assets/meadow.webp','./assets/partyposs.webp','./assets/partyposs-attack.webp','./assets/balls.webp','./assets/effects.webp','./assets/icon.png'];
+const CACHE='partyposs-v2-woodbadge';
+const FILES=['./','./index.html','./style.css','./adventure.css','./game.js','./core.js','./world.js','./adventure.js','./art.js','./manifest.webmanifest','./assets/meadow.webp','./assets/partyposs.webp','./assets/partyposs-attack.webp','./assets/balls.webp','./assets/effects.webp','./assets/icon.png','./assets/critters-a.webp','./assets/critters-b.webp','./assets/trail-map.webp'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('partyposs-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{

@@ -1,13 +1,13 @@
-import { clamp, measureThrow, throwQuality, catchChance, earnedXP, loadProfile } from './core.js';
+import { clamp, measureThrow, throwQuality, catchChance, earnedXP } from './core.js';
+import {profile,save,SPECIES,ZONES,awardCatch,owned} from './world.js';
+import {artHTML,setArt} from './art.js';
 
 const $ = id => document.getElementById(id);
 const game = $('game');
 const canvas = $('effects');
 const ctx = canvas.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const STORAGE_KEY = 'partyposs-save-v1';
-let profile;
-try { profile = loadProfile(JSON.parse(localStorage.getItem(STORAGE_KEY))); } catch { profile = loadProfile(); }
+let encounter={species:'partyposs',level:12,weakened:false};
 let phase = 'loading', gameTime = 0, phaseStart = 0, previousFrame = 0;
 let width = 390, height = 844, dpr = 1, ring = 1, target = { x: 0.5, y: 0.5 };
 let berryBoost = false, ballType = 'normal', hitCount = 0, encounterThrows = 0;
@@ -15,11 +15,8 @@ let shot = null, pointer = null, lastMoveTime = -20000, lastMessageTime = -10000
 let cameraStream = null, cameraPending = false, audioContext = null, finishedThrow = null;
 let particles = [], sparkleClock = 0, resultShown = false;
 const images = {};
-const assetPaths = { meadow: './assets/meadow.webp', idle: './assets/partyposs.webp', attack: './assets/partyposs-attack.webp', balls: './assets/balls.webp', fx: './assets/effects.webp' };
-
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch { /* The game still works when storage is unavailable. */ }
-}
+const assetPaths = { meadow: './assets/meadow.webp', idle: './assets/partyposs.webp', attack: './assets/partyposs-attack.webp', balls: './assets/balls.webp', fx: './assets/effects.webp',a:'./assets/critters-a.webp',b:'./assets/critters-b.webp',map:'./assets/trail-map.webp' };
+const encounterOpen=()=>game.dataset.screen==='encounter';
 
 function setPhase(next) {
   phase = next;
@@ -34,6 +31,8 @@ function updateControls() {
   $('berry-button').disabled = !ready || berryBoost || profile.berries <= 0;
   $('ball-button').disabled = !ready || (profile.ultras <= 0 && ballType === 'normal');
   $('attack-button').disabled = !ready || gameTime - lastMoveTime < 8000;
+  $('wild-battle-button').disabled=!ready;
+  $('journal-button').disabled=!['ready','attacking','loading'].includes(phase);
   $('berry-count').textContent = profile.berries;
   $('ultra-count').textContent = ballType === 'ultra' ? '∞' : profile.ultras;
   $('catch-count').textContent = profile.caught;
@@ -84,6 +83,7 @@ function tone(notes, duration = 0.12, type = 'sine') {
     });
   } catch { /* Sound is optional on browsers without Web Audio. */ }
 }
+export {tone as playSound};
 
 function haptic(pattern) { try { navigator.vibrate?.(pattern); } catch { /* Optional on mobile. */ } }
 function modalOpen() { return !!document.querySelector('dialog[open]'); }
@@ -100,16 +100,36 @@ function beginEncounter() {
   setPhase('ready');
 }
 
+export function startEncounter(species,level,options={}){
+  if(!SPECIES[species])return false;
+  encounter={species,level,weakened:options.weakened===true};
+  const s=SPECIES[species];game.dataset.species=species;game.dataset.zone=profile.zone;
+  $('encounter-name').textContent=s.name;
+  $('encounter-cp').innerHTML=`<small>CP</small> ${species==='partyposs'?420:40+level*24}`;
+  $('encounter-subtitle').textContent=species==='partyposs'?'A Birthday Every Day':`Level ${level} · ${ZONES.find(z=>z.id===profile.zone)?.name||'The woodland'}`;
+  $('encounter-rarity').textContent=options.weakened?'✦ Catch boosted':species==='partyposs'?'✦ Legendary':'✦ Patrol critter';
+  $('encounter-type').textContent=`✿ ${s.type}`;$('encounter-type').style.background=s.color;
+  document.querySelector('.encounter-card').setAttribute('aria-label',`Wild ${s.name}, level ${level}, ${s.type}`);
+  $('idle-sprite').hidden=species!=='partyposs';$('attack-sprite').hidden=species!=='partyposs';$('wild-critter').hidden=species==='partyposs';
+  if(species!=='partyposs')setArt($('wild-critter'),species);
+  $('attack-button').hidden=species!=='partyposs';
+  $('photo-button').setAttribute('aria-label',`Save a photo of ${s.name}`);
+  beginEncounter();message(`A wild ${s.name} appeared!`,2200);return true;
+}
+
+export function currentEncounter(){return {...encounter};}
+export function leaveEncounter(){stopCamera();pointer=null;particles=[];finishedThrow?.({ok:false,reason:'Encounter ended'});finishedThrow=null;beginEncounter();}
+
 function useBerry() {
-  if (phase !== 'ready' || berryBoost || profile.berries < 1 || modalOpen()) return false;
+  if (phase !== 'ready' || !encounterOpen() || berryBoost || profile.berries < 1 || modalOpen()) return false;
   profile.berries--; berryBoost = true; save(); updateControls();
-  message('A birthday treat! Catch chance boosted.');
+  message('A trail treat! Catch chance boosted.');
   burst(target.x, 0.5, 15, 'hearts'); tone([440, 660, 880]); haptic(20);
   return true;
 }
 
 function switchBall() {
-  if (phase !== 'ready' || modalOpen()) return false;
+  if (phase !== 'ready' || !encounterOpen() || modalOpen()) return false;
   if (ballType === 'normal' && profile.ultras < 1) { message('No Ultra Balls left. Regular balls are unlimited.'); return false; }
   ballType = ballType === 'normal' ? 'ultra' : 'normal';
   updateControls(); tone([350, 500], 0.06);
@@ -117,7 +137,7 @@ function switchBall() {
 }
 
 function useMauiWali() {
-  if (phase !== 'ready' || gameTime - lastMoveTime < 8000 || modalOpen()) return false;
+  if (phase !== 'ready' || !encounterOpen() || encounter.species!=='partyposs' || gameTime - lastMoveTime < 8000 || modalOpen()) return false;
   lastMoveTime = gameTime; setPhase('attacking');
   message('', 4400, true);
   burst(0.5, 0.46, reducedMotion ? 18 : 60, 'magic');
@@ -126,11 +146,11 @@ function useMauiWali() {
 }
 
 function throwBall(gesture = {dx:0,dy:0,tap:true}) {
-  if (phase !== 'ready' || modalOpen()) return Promise.resolve({ok:false,reason:'Encounter is busy'});
+  if (phase !== 'ready' || !encounterOpen() || modalOpen()) return Promise.resolve({ok:false,reason:'Encounter is busy'});
   const measured = measureThrow({...gesture,width,height}, target);
   if (!measured) {
     $('throw-button').style.transform = '';
-    message('Swipe up toward PartyPoss.');
+    message(`Swipe up toward ${SPECIES[encounter.species].name}.`);
     return Promise.resolve({ok:false,reason:'Swipe upward to throw'});
   }
   const quality = throwQuality(ring, measured.accuracy);
@@ -139,7 +159,7 @@ function throwBall(gesture = {dx:0,dy:0,tap:true}) {
   if (ultra) profile.ultras--;
   encounterThrows++; profile.throws++; save();
   if (measured.hit) hitCount++;
-  const chance = catchChance({quality,berry:berryBoost,ultra,hits:hitCount});
+  const chance = hitCount>=3?1:clamp(catchChance({quality,berry:berryBoost,ultra,hits:hitCount})+(encounter.weakened?.28:0)-(encounter.species==='partyposs'?.12:0),.12,.97);
   shot = {...measured, quality, ultra, success: measured.hit && Math.random() < chance, startX:0.5,startY:0.88};
   if (measured.hit) berryBoost = false;
   $('flying-ball').querySelector('.ball-sprite').classList.toggle('ultra', ultra);
@@ -158,18 +178,23 @@ function finishThrow(result) {
 function caught() {
   setPhase('caught');
   const xp = earnedXP(shot.quality, encounterThrows === 1);
-  profile.caught++; profile.xp += xp;
-  profile.berries = Math.min(99, profile.berries + 2);
-  profile.ultras = Math.min(99, profile.ultras + 1);
-  profile.catches.unshift({date:new Date().toISOString(),quality:shot.quality,xp});
-  profile.catches = profile.catches.slice(0,20);
+  const wasChampion=profile.champion;
+  const reward=awardCatch(encounter.species,encounter.level,xp);
+  profile.catches[0].quality=shot.quality;
   save(); updateControls();
+  const name=SPECIES[encounter.species].name;
+  $('result-eyebrow').textContent=reward.isNew?'A NEW TRAIL COMPANION':'YOUR FRIEND GREW STRONGER';
+  $('result-subtitle').textContent=`${name} was caught.`;
+  $('result-art').innerHTML=artHTML(encounter.species);
+  $('result-name').innerHTML=`${name} <span>Level ${reward.unit.level}</span>`;
+  $('catch-rewards').textContent=`+${reward.isNew?65:30} coins · +2 berries · +1 Ultra Ball`;
   $('result-xp').textContent = xp;
   $('result-quality').textContent = shot.quality;
-  message('Gotcha! Happy birthday, PartyPoss!', 2800);
+  message(`Gotcha! ${name} joined your woodland.`, 2800);
   burst(shot.x,0.6, reducedMotion ? 20 : 75,'celebrate');
   tone([523, 659, 784, 1047], 0.14, 'triangle'); haptic([40,60,40,60,100]);
   finishThrow({ok:true,caught:true,quality:shot.quality,xp});
+  window.dispatchEvent(new CustomEvent('crittercaught',{detail:{species:encounter.species,isNew:reward.isNew,champion:!wasChampion&&profile.champion}}));
 }
 
 function escape() {
@@ -178,7 +203,7 @@ function escape() {
   $('creature').style.opacity = '1';
   $('creature-shadow').style.opacity = '1';
   burst(target.x, target.y, 22, 'sparkles');
-  message('So close! PartyPoss broke free.');
+  message(`So close! ${SPECIES[encounter.species].name} broke free.`);
   tone([520,390,330]);
 }
 
@@ -251,7 +276,7 @@ function drawMagic(time) {
 
 function frame(now) {
   const dt=Math.min((now-(previousFrame||now))/1000,.05);previousFrame=now;
-  const paused=document.hidden || ($('help-dialog').open || $('journal-dialog').open) || matchMedia('(orientation:landscape) and (max-height:500px) and (pointer:coarse)').matches;
+  const paused=!encounterOpen() || document.hidden || ($('help-dialog').open || $('journal-dialog').open) || matchMedia('(orientation:landscape) and (max-height:500px) and (pointer:coarse)').matches;
   if(!paused) gameTime+=dt*1000;
   const elapsed=gameTime-phaseStart;
   ctx.clearRect(0,0,width,height);
@@ -269,7 +294,7 @@ function frame(now) {
       placeBall(shot.startX+(shot.x-shot.startX)*p,shot.startY+(shot.y-shot.startY)*ease-Math.sin(p*Math.PI)*.15,1-.62*p,p*(shot.ultra?280:360));
       if(p>=1) {
         if(shot.hit) {setPhase('pulling');message(`${shot.quality}!`,1300);burst(shot.x,shot.y,22,'sparkles');tone([740,988],.08);haptic(30);}
-        else {setPhase('missing');message('Just missed! Aim your swipe toward PartyPoss.');}
+        else {setPhase('missing');message('Just missed! Aim toward the critter.');}
       }
     } else if(phase==='pulling') {
       const p=clamp(elapsed/480,0,1);
@@ -315,7 +340,7 @@ function resize() {
 }
 
 $('throw-button').addEventListener('pointerdown',event=>{
-  if(phase!=='ready'||modalOpen()||!event.isPrimary) return;
+  if(phase!=='ready'||!encounterOpen()||modalOpen()||!event.isPrimary) return;
   event.preventDefault();
   pointer={id:event.pointerId,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY};
   $('throw-button').setPointerCapture(event.pointerId);
@@ -340,30 +365,32 @@ $('ball-button').addEventListener('click',switchBall);
 $('attack-button').addEventListener('click',useMauiWali);
 $('help-button').addEventListener('click',()=>$('help-dialog').showModal());
 $('sound-button').addEventListener('click',()=>{profile.sound=!profile.sound;save();updateControls();tone([523,659]);});
-$('result-dialog').addEventListener('close',()=>{if(phase==='caught')beginEncounter();});
+$('result-dialog').addEventListener('close',()=>{if(phase==='caught'){beginEncounter();window.dispatchEvent(new Event('encounterdone'));}});
 document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>$(button.dataset.close).close()));
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}));
 document.addEventListener('keydown',event=>{
-  if(event.repeat||modalOpen())return;
+  if(event.repeat||!encounterOpen()||modalOpen())return;
   if(event.code==='Space'){if(event.target.closest('button'))return;event.preventDefault();void throwBall();}
   else if(event.key.toLowerCase()==='b')useBerry();
   else if(event.key.toLowerCase()==='u')switchBall();
   else if(event.key.toLowerCase()==='m')useMauiWali();
 });
 
-$('journal-button').addEventListener('click',()=>{
+$('journal-button').addEventListener('click',()=>window.dispatchEvent(new Event('encounterdone')));
+export function openCatchLog(){
   $('journal-caught').textContent=profile.caught;
   $('journal-xp').textContent=profile.xp.toLocaleString();
   $('journal-empty').hidden=profile.catches.length>0;
   $('journal-list').replaceChildren(...profile.catches.map(entry=>{
     const li=document.createElement('li'),img=document.createElement('img'),copy=document.createElement('div'),name=document.createElement('strong'),meta=document.createElement('small'),xp=document.createElement('span');
-    img.src=assetPaths.idle;img.alt='';name.textContent='PartyPoss';
-    meta.textContent=`${entry.quality} throw · ${new Date(entry.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}`;
+    img.src=assetPaths.idle;img.alt='';name.textContent=SPECIES[entry.species]?.name||'PartyPoss';
+    meta.textContent=`${entry.quality||'Trail'} catch · ${new Date(entry.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}`;
     xp.className='entry-xp';xp.textContent=`+${entry.xp} XP`;
-    copy.append(name,meta);li.append(img,copy,xp);return li;
+    const art=document.createElement('div');art.innerHTML=artHTML(entry.species||'partyposs');art.style.width='45px';art.style.height='54px';art.style.flexShrink='0';
+    copy.append(name,meta);li.append(art,copy,xp);return li;
   }));
   $('journal-dialog').showModal();
-});
+}
 
 function stopCamera() {
   cameraStream?.getTracks().forEach(track=>track.stop());cameraStream=null;
@@ -379,7 +406,7 @@ $('ar-button').addEventListener('click',async()=>{
     const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     if(document.hidden){stream.getTracks().forEach(t=>t.stop());return;}
     cameraStream=stream;$('camera-feed').srcObject=stream;await $('camera-feed').play();
-    game.classList.add('ar-on');$('ar-button').setAttribute('aria-checked','true');message('PartyPoss, right in your world.');
+    game.classList.add('ar-on');$('ar-button').setAttribute('aria-checked','true');message(`${SPECIES[encounter.species].name}, right in your world.`);
   }catch(error){stopCamera();message(error.name==='NotAllowedError'?'Camera access wasn’t enabled. The meadow is still here.':'Couldn’t start the camera. Try another browser.',3500);}
   finally{cameraPending=false;$('ar-button').disabled=false;}
 });
@@ -394,22 +421,24 @@ $('photo-button').addEventListener('click',async()=>{
   const output=document.createElement('canvas');output.width=720;output.height=Math.round(720*height/width);
   const photo=output.getContext('2d'),w=output.width,h=output.height;
   drawCover(photo,cameraStream?$('camera-feed'):images.meadow,0,0,w,h);
-  const sprite=phase==='attacking'?images.attack:images.idle;
+  const species=SPECIES[encounter.species];
+  const sprite=encounter.species==='partyposs'?(phase==='attacking'?images.attack:images.idle):images[species.atlas];
   const rect=$('creature').getBoundingClientRect(),scene=game.getBoundingClientRect(),scale=w/width;
   const bw=rect.width*scale,bh=rect.height*scale,fit=Math.min(bw/sprite.width,bh/sprite.height);
-  photo.drawImage(sprite,(rect.left-scene.left)*scale+(bw-sprite.width*fit)/2,(rect.top-scene.top)*scale+bh-sprite.height*fit,sprite.width*fit,sprite.height*fit);
+  if(encounter.species==='partyposs')photo.drawImage(sprite,(rect.left-scene.left)*scale+(bw-sprite.width*fit)/2,(rect.top-scene.top)*scale+bh-sprite.height*fit,sprite.width*fit,sprite.height*fit);
+  else{const cell=sprite.width/2,size=bw;photo.drawImage(sprite,(species.cell%2)*cell,Math.floor(species.cell/2)*cell,cell,cell,(rect.left-scene.left)*scale,(rect.top-scene.top)*scale+(bh-size)/2,size,size);}
   photo.drawImage(canvas,0,0,w,h);
   roundedBox(photo,w*.13,h*.12,w*.74,95,46,'#163c60cb');
-  photo.textAlign='center';photo.fillStyle='white';photo.font='600 34px system-ui';photo.fillText('PartyPoss  /  CP 420',w/2,h*.12+42);
-  photo.fillStyle='#d5e6ee';photo.font='22px system-ui';photo.fillText('A Birthday Every Day',w/2,h*.12+74);
+  photo.textAlign='center';photo.fillStyle='white';photo.font='600 34px system-ui';photo.fillText(`${species.name}  /  Lv ${encounter.level}`,w/2,h*.12+42);
+  photo.fillStyle='#d5e6ee';photo.font='22px system-ui';photo.fillText(encounter.species==='partyposs'?'A Birthday Every Day':'Wood Badge · Critter Quest',w/2,h*.12+74);
   if(phase==='attacking'){roundedBox(photo,35,h*.78,w-70,55,27,'#20372cbd');photo.font='600 23px system-ui';photo.fillStyle='#eac1ff';photo.fillText('✦ PartyPoss used Maui Wali! ✦',w/2,h*.78+36);}
   output.toBlob(async blob=>{
     if(!blob){message('Couldn’t save the photo. Please try again.');return;}
-    const file=new File([blob],'PartyPoss.png',{type:'image/png'});
+    const file=new File([blob],`${species.name}.png`,{type:'image/png'});
     try{
-      if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:'PartyPoss'});return;}
+      if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:species.name});return;}
     }catch(error){if(error.name==='AbortError')return;}
-    const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='PartyPoss.png';link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);message('Photo saved. A little birthday keepsake!');
+    const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`${species.name}.png`;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);message('Photo saved. A keepsake from the trail!');
   },'image/png');
 });
 
@@ -421,7 +450,7 @@ async function loadAssets() {
     })));
     $('loader').classList.add('leaving');setTimeout(()=>$('loader').hidden=true,450);
     beginEncounter();
-    if(profile.caught===0)message('A wild PartyPoss appeared!',2500);
+    window.dispatchEvent(new Event('woodlandready'));
   } catch {
     $('loader').querySelector('h2').textContent='The meadow hasn’t loaded yet.';
     $('loader').querySelector('p').textContent='Check your connection, then try again.';
@@ -447,4 +476,5 @@ function registerTools(){
   window.addEventListener('pagehide',()=>lifecycle.abort(),{once:true});
 }
 resize();new ResizeObserver(resize).observe(game);updateControls();requestAnimationFrame(frame);void loadAssets();registerTools();
+window.addEventListener('profilechange',updateControls);
 if('serviceWorker'in navigator&&location.hostname!=='127.0.0.1'&&location.hostname!=='localhost')navigator.serviceWorker.register('./sw.js').catch(()=>{});
