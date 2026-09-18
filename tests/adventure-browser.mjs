@@ -9,13 +9,13 @@ await mkdir('output/qa-v2',{recursive:true});
 const allErrors=[];
 const watch=page=>{page.on('pageerror',e=>allErrors.push(e.message));page.on('response',r=>{if(r.status()>=400)allErrors.push(`${r.status()} ${r.url()}`);});};
 const ready=page=>page.waitForFunction(()=>document.querySelector('#game').dataset.phase==='ready');
-const loaded=page=>page.locator('#loader').waitFor({state:'hidden'});
+const loaded=async page=>{await page.locator('#loader').waitFor({state:'hidden'});if(!await page.locator('#starter-dialog').isVisible())await page.locator('[data-walk="book"]:visible').click();};
 const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('woodbadge-quest-v2')));
 try{
   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,acceptDownloads:true});
   const page=await context.newPage();watch(page);await page.goto('http://127.0.0.1:4173/');await loaded(page);
   await page.screenshot({path:'output/qa-v2/starter.png'});
-  await page.locator('[data-action="starter"][data-arg="beaver"]').click();
+  await page.locator('[data-action="starter"][data-arg="beaver"]').click();await page.locator('[data-walk="book"]:visible').click();
   assert.equal((await saved(page)).team[0],'beaver');
   await page.screenshot({path:'output/qa-v2/trail.png'});
   await page.locator('[data-action="zone"][data-arg="1"]').click();
@@ -58,7 +58,7 @@ try{
   assert.match(await page.locator('.battle-health.ally').textContent(),/Bobwhite/);
   await page.locator('[data-action="retreat"]').click();
   await page.locator('#camp-button').click();await page.locator('[data-action="rest"]').click();
-  await page.locator('[data-tab="trail"]').click();
+  await page.locator('[data-tab="map"]').click();await page.locator('[data-walk="book"]:visible').click();
   for(const [w,h,name] of [[320,568,'small-phone'],[430,932,'large-phone'],[1440,1000,'desktop']]){await page.setViewportSize({width:w,height:h});await page.screenshot({path:`output/qa-v2/${name}.png`});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);const explore=await page.locator('[data-action="explore"]').boundingBox();assert.ok(explore.y>=0&&explore.y+explore.height<h);}
   await context.close();
 
@@ -80,7 +80,7 @@ try{
   await end.screenshot({path:'output/qa-v2/badge-earned.png'});
   await end.locator('[data-action="result-trail"]').click();
   await end.locator('[data-tab="tickets"]').click();await end.locator('[data-action="claim"][data-arg="collection"]').click();assert.ok((await saved(end)).claimed.includes('collection'));await end.screenshot({path:'output/qa-v2/tickets.png'});
-  await end.locator('[data-tab="trail"]').click();await end.locator('[data-action="oak"]').click();
+  await end.locator('[data-tab="map"]').click();await end.locator('[data-walk="book"]:visible').click();await end.locator('[data-action="oak"]').click();
   assert.equal(await end.locator('#encounter-name').textContent(),'PartyPoss');
   await end.locator('#attack-button').click();await end.waitForTimeout(1200);await end.screenshot({path:'output/qa-v2/maui-wali.png'});await ready(end);
   await end.evaluate(()=>{Math.random=()=>0;});await end.locator('#throw-button').press('Enter');await end.locator('#result-dialog').waitFor({state:'visible'});await end.locator('#next-button').click();

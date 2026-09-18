@@ -9,7 +9,7 @@ try{
   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,acceptDownloads:true});
   await context.addInitScript(()=>{if(!localStorage.getItem('woodbadge-quest-v2'))localStorage.setItem('partyposs-save-v1',JSON.stringify({caught:6,xp:1230,throws:14,berries:8,ultras:3,sound:true,catches:[]}));});
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://127.0.0.1:4173/');await page.locator('#loader').waitFor({state:'hidden'});await page.locator('[data-action="starter"][data-arg="fox"]').click();
+  await page.goto('http://127.0.0.1:4173/');await page.locator('#loader').waitFor({state:'hidden'});await page.locator('[data-action="starter"][data-arg="fox"]').click();await page.locator('[data-walk="book"]:visible').click();
   const migrated=await page.evaluate(()=>JSON.parse(localStorage.getItem('woodbadge-quest-v2')));
   assert.equal(migrated.caught,6);assert.equal(migrated.xp,1230);assert.equal(migrated.berries,8);assert.equal(migrated.ultras,3);assert.ok(migrated.roster.some(u=>u.species==='partyposs'));
   await page.locator('[data-action="oak"]').click();
@@ -18,7 +18,7 @@ try{
   await context.grantPermissions(['camera']);await page.locator('#ar-button').click();await page.waitForFunction(()=>document.querySelector('#ar-button').getAttribute('aria-checked')==='true');await page.locator('#journal-button').click();
   await page.waitForFunction(()=>document.querySelector('#game').dataset.screen==='world');assert.equal(await page.locator('#camera-feed').evaluate(v=>v.srcObject),null);
   await page.evaluate(async()=>{await navigator.serviceWorker.register('./sw.js');await navigator.serviceWorker.ready;});await page.reload();await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
-  await context.setOffline(true);await page.reload();await page.locator('#loader').waitFor({state:'hidden'});await page.locator('[data-action="oak"]').click();await page.locator('#attack-button').click();assert.match(await page.locator('#message').textContent(),/Maui Wali/);await page.waitForTimeout(1000);await page.screenshot({path:'output/qa-v2/offline-maui.png'});
+  await context.setOffline(true);await page.reload();await page.locator('#loader').waitFor({state:'hidden'});await page.locator('[data-walk="book"]:visible').click();await page.locator('[data-action="oak"]').click();await page.locator('#attack-button').click();assert.match(await page.locator('#message').textContent(),/Maui Wali/);await page.waitForTimeout(1000);await page.screenshot({path:'output/qa-v2/offline-maui.png'});
   await context.close();
 
   const full=normalizeSave(null);chooseStarter('fox',full);full.roster=[...PATROL_IDS,'partyposs'].map(id=>makeUnit(id,12));full.team=['partyposs','bear','buffalo'];full.badges=['lakeside','hollow'];full.zone='ridge';
@@ -28,7 +28,7 @@ try{
   const cdp=await advanced.newCDPSession(mobile);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:15,y:430}]});for(let i=1;i<=8;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:15,y:430-i*32}]});await mobile.waitForTimeout(20);}await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await mobile.waitForTimeout(250);
   assert.ok(await mobile.locator('#world-content').evaluate(e=>e.scrollTop)>80,'Patrol must scroll with a real touch gesture');
-  await mobile.locator('[data-tab="trail"]').click();await mobile.locator('[data-action="trial"]').click();
+  await mobile.locator('[data-tab="map"]').click();await mobile.locator('[data-walk="book"]:visible').click();await mobile.locator('[data-action="trial"]').click();
   for(let i=0;i<3;i++){await mobile.locator('[data-action="battle"][data-arg="guard"]').click();await mobile.waitForFunction(()=>!document.querySelector('[data-action="battle"][data-arg="attack"]').disabled);}
   await mobile.locator('[data-action="battle"][data-arg="special"]').click();
   assert.ok(await mobile.locator('#battle-screen').evaluate(e=>e.classList.contains('is-maui')));assert.match(await mobile.locator('.battle-log').textContent(),/Maui Wali/);

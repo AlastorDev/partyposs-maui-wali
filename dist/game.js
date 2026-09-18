@@ -15,7 +15,7 @@ let shot = null, pointer = null, lastMoveTime = -20000, lastMessageTime = -10000
 let cameraStream = null, cameraPending = false, audioContext = null, finishedThrow = null;
 let particles = [], sparkleClock = 0, resultShown = false;
 const images = {};
-const assetPaths = { meadow: './assets/meadow.webp', idle: './assets/partyposs.webp', attack: './assets/partyposs-attack.webp', balls: './assets/balls.webp', fx: './assets/effects.webp',a:'./assets/critters-a.webp',b:'./assets/critters-b.webp',map:'./assets/trail-map.webp' };
+const assetPaths = { meadow: './assets/meadow.webp', idle: './assets/partyposs.webp', attack: './assets/partyposs-attack.webp', balls: './assets/camp-items.webp', fx: './assets/effects.webp',a:'./assets/critters-a.webp',b:'./assets/critters-b.webp',map:'./assets/trail-map.webp' };
 const encounterOpen=()=>game.dataset.screen==='encounter';
 
 function setPhase(next) {
@@ -36,10 +36,10 @@ function updateControls() {
   $('berry-count').textContent = profile.berries;
   $('ultra-count').textContent = ballType === 'ultra' ? '∞' : profile.ultras;
   $('catch-count').textContent = profile.caught;
-  $('ball-label').textContent = ballType === 'ultra' ? 'POKÉ BALL' : 'ULTRA BALL';
-  $('berry-button').setAttribute('aria-label', `Use a berry, ${profile.berries} remaining${berryBoost ? ', already active' : ''}`);
-  $('ball-button').setAttribute('aria-label', ballType === 'ultra' ? 'Switch to Poké Ball, unlimited' : `Switch to Ultra Ball, ${profile.ultras} remaining`);
-  $('throw-button').setAttribute('aria-label', `Throw a ${ballType === 'ultra' ? 'Ultra Ball' : 'Poké Ball'}. Swipe up, or press Enter to throw.`);
+  $('ball-label').textContent = ballType === 'ultra' ? 'TRAIL WOGGLE' : 'GOLDEN WOGGLE';
+  $('berry-button').setAttribute('aria-label', `Use a Campfire Story card, ${profile.berries} remaining${berryBoost ? ', already active' : ''}`);
+  $('ball-button').setAttribute('aria-label', ballType === 'ultra' ? 'Switch to Trail Woggle, unlimited' : `Switch to Golden Woggle, ${profile.ultras} remaining`);
+  $('throw-button').setAttribute('aria-label', `Throw a ${ballType === 'ultra' ? 'Golden Woggle' : 'Trail Woggle'}. Swipe up, or press Enter to throw.`);
   $('throw-button').querySelector('.ball-sprite').classList.toggle('ultra', ballType === 'ultra');
   $('ball-button').querySelector('.ball-sprite').classList.toggle('ultra', ballType !== 'ultra');
   $('berry-active').hidden = !berryBoost;
@@ -123,14 +123,14 @@ export function leaveEncounter(){stopCamera();pointer=null;particles=[];finished
 function useBerry() {
   if (phase !== 'ready' || !encounterOpen() || berryBoost || profile.berries < 1 || modalOpen()) return false;
   profile.berries--; berryBoost = true; save(); updateControls();
-  message('A trail treat! Catch chance boosted.');
+  message('A campfire story! Your friendship chance is boosted.');
   burst(target.x, 0.5, 15, 'hearts'); tone([440, 660, 880]); haptic(20);
   return true;
 }
 
 function switchBall() {
   if (phase !== 'ready' || !encounterOpen() || modalOpen()) return false;
-  if (ballType === 'normal' && profile.ultras < 1) { message('No Ultra Balls left. Regular balls are unlimited.'); return false; }
+  if (ballType === 'normal' && profile.ultras < 1) { message('No Golden Woggles left. Trail Woggles are unlimited.'); return false; }
   ballType = ballType === 'normal' ? 'ultra' : 'normal';
   updateControls(); tone([350, 500], 0.06);
   return true;
@@ -155,7 +155,7 @@ function throwBall(gesture = {dx:0,dy:0,tap:true}) {
   }
   const quality = throwQuality(ring, measured.accuracy);
   const ultra = ballType === 'ultra';
-  if (ultra && profile.ultras < 1) return Promise.resolve({ok:false,reason:'No Ultra Balls remaining'});
+  if (ultra && profile.ultras < 1) return Promise.resolve({ok:false,reason:'No Golden Woggles remaining'});
   if (ultra) profile.ultras--;
   encounterThrows++; profile.throws++; save();
   if (measured.hit) hitCount++;
@@ -184,13 +184,13 @@ function caught() {
   save(); updateControls();
   const name=SPECIES[encounter.species].name;
   $('result-eyebrow').textContent=reward.isNew?'A NEW TRAIL COMPANION':'YOUR FRIEND GREW STRONGER';
-  $('result-subtitle').textContent=`${name} was caught.`;
+  $('result-subtitle').textContent=`${name} joined your patrol.`;
   $('result-art').innerHTML=artHTML(encounter.species);
   $('result-name').innerHTML=`${name} <span>Level ${reward.unit.level}</span>`;
-  $('catch-rewards').textContent=`+${reward.isNew?65:30} coins · +2 berries · +1 Ultra Ball`;
+  $('catch-rewards').textContent=`+${reward.isNew?65:30} coins · +2 story cards · +1 Golden Woggle`;
   $('result-xp').textContent = xp;
   $('result-quality').textContent = shot.quality;
-  message(`Gotcha! ${name} joined your woodland.`, 2800);
+  message(`Welcome! ${name} joined your woodland.`, 2800);
   burst(shot.x,0.6, reducedMotion ? 20 : 75,'celebrate');
   tone([523, 659, 784, 1047], 0.14, 'triangle'); haptic([40,60,40,60,100]);
   finishThrow({ok:true,caught:true,quality:shot.quality,xp});
@@ -203,7 +203,7 @@ function escape() {
   $('creature').style.opacity = '1';
   $('creature-shadow').style.opacity = '1';
   burst(target.x, target.y, 22, 'sparkles');
-  message(`So close! ${SPECIES[encounter.species].name} broke free.`);
+  message(`So close! ${SPECIES[encounter.species].name} needs another invitation.`);
   tone([520,390,330]);
 }
 
@@ -298,16 +298,16 @@ function frame(now) {
       }
     } else if(phase==='pulling') {
       const p=clamp(elapsed/480,0,1);
-      $('creature').style.opacity=String(1-p);
-      $('creature').style.transform=`translateX(-50%) scale(${1-p*.85})`;
-      $('creature-shadow').style.opacity=String(1-p);
+      $('creature').style.opacity='1';
+      $('creature').style.transform=`translateX(-50%) scale(${1+Math.sin(p*Math.PI)*.06})`;
+      $('creature-shadow').style.opacity='1';
       $('flash').style.opacity=String(Math.sin(p*Math.PI)*.6);
-      placeBall(shot.x,shot.y+p*.12,.38);
+      placeBall(shot.x,shot.y+p*.12,.38+p*.16);
       if(p>=1) {$('flash').style.opacity='0';setPhase('shaking');}
     } else if(phase==='shaking') {
       const wave=elapsed%800;
       const angle=wave<370?Math.sin(wave/370*Math.PI*2)*18:0;
-      placeBall(shot.x,shot.y+.12,.38,angle);
+      placeBall(shot.x,shot.y+.12,.54,angle);
       if(elapsed>=2500) shot.success?caught():escape();
     } else if(phase==='missing') {
       const p=clamp(elapsed/600,0,1);
@@ -467,8 +467,8 @@ function registerTools(){
   const schema={type:'object',properties:{},additionalProperties:false};
   const validate=input=>{if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).length)throw new Error('This tool takes an empty object.');};
   for(const tool of [
-    {name:'read_partyposs_game',description:'Read the current encounter, selected ball, and saved catch totals.',annotations:{readOnlyHint:true},execute:input=>{validate(input);return{phase,ballType,berryBoost,caught:profile.caught,xp:profile.xp,berries:profile.berries,ultras:profile.ultras};}},
-    {name:'throw_partyposs_ball',description:'Throw the selected ball toward PartyPoss and wait for the capture result. Consumes an Ultra Ball when selected.',execute:async input=>{validate(input);return await throwBall();}},
+    {name:'read_partyposs_game',description:'Read the current encounter, selected woggle, and saved catch totals.',annotations:{readOnlyHint:true},execute:input=>{validate(input);return{phase,ballType,berryBoost,caught:profile.caught,xp:profile.xp,berries:profile.berries,ultras:profile.ultras};}},
+    {name:'offer_partyposs_woggle',description:'Throw the selected woggle toward PartyPoss and wait for the capture result. Consumes a Golden Woggle when selected.',execute:async input=>{validate(input);return await throwBall();}},
     {name:'use_partyposs_maui_wali',description:'Trigger the visible Maui Wali attack animation when the encounter is ready and the move has cooled down.',execute:input=>{validate(input);return{started:useMauiWali(),phase};}}
   ]){
     try{void Promise.resolve(context.registerTool({...tool,inputSchema:schema},{signal:lifecycle.signal})).catch(()=>{});}catch{/* Unsupported experimental implementations are optional. */}

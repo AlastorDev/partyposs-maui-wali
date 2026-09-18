@@ -1,12 +1,19 @@
 {
   "name": "Woodland · Critter Quest",
   "short_name": "Critter Quest",
-  "description": "Catch the patrol critters. Explore the woodland. Earn your badges.",
+  "description": "Walk your neighborhood, spin supply stops, challenge Patrol Lodges, and befriend woodland critters.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#173b49",
   "theme_color": "#173b49",
-  "icons": [{"src":"./assets/icon.png","sizes":"512x512","type":"image/png","purpose":"any"}]
+  "icons": [
+    {
+      "src": "./assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }

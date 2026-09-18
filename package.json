@@ -1,12 +1,12 @@
 {
   "name": "partyposs-maui-wali",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "A complete Woodland critter adventure with catching, patrol battles, trials, and PartyPoss.",
+  "description": "A mobile GPS woodland adventure with supply stops, personal Patrol Lodges, and critter friendships.",
   "scripts": {
     "start": "node scripts/serve.mjs",
-    "test": "node --test tests/core.test.mjs tests/world.test.mjs",
-    "check": "node --check dist/game.js && node --check dist/core.js && node --check dist/world.js && node --check dist/adventure.js && node --check dist/art.js && node --check dist/sw.js"
+    "test": "node --test tests/core.test.mjs tests/world.test.mjs tests/geo.test.mjs",
+    "check": "node --check dist/game.js && node --check dist/core.js && node --check dist/world.js && node --check dist/adventure.js && node --check dist/art.js && node --check dist/sw.js && node --check dist/geo.js && node --check dist/walking.js && node --check dist/icons.js"
   }
 }

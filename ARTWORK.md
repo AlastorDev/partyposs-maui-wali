@@ -1,5 +1,13 @@
 # Artwork provenance
 
+## Walking expansion: camp items
+
+Final game asset: `dist/assets/camp-items.webp`. Generated with the built-in image-generation tool; encoded as a transparent WebP atlas with three square cells: Trail Woggle, Golden Woggle, Campfire Story card. This replaces the original ball artwork in the playable game. The original ball prompt below is retained as historical provenance. Map pins, Lodge markers, compass controls, and the scout avatar are code-native SVG/CSS.
+
+Final generation prompt:
+
+undefined
+
 Prepared using the built-in image-generation tool from two PartyPoss images supplied by the user. Generated transparent assets were encoded to WebP with alpha preserved. The application uses the atlas cells as sprites; no remote image service is needed.
 
 ## partyposs-character

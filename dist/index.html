@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#173b49">
-  <meta name="description" content="Explore the Woodland trails. Catch eight patrol critters, train your team, earn badges, and discover PartyPoss and Maui Wali.">
+  <meta name="description" content="Explore your neighborhood with live GPS. Befriend woodland critters, spin supply stops, challenge Patrol Lodges, and discover PartyPoss and Maui Wali.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Woodland · Critter Quest</title>
@@ -13,6 +13,8 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./adventure.css">
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="./walking.css">
   <link rel="preload" as="image" href="./assets/meadow.webp">
 </head>
 <body>
@@ -48,31 +50,31 @@
     <div id="flash" class="flash" aria-hidden="true"></div>
 
     <div id="message" class="message" role="status" aria-live="polite"></div>
-    <div id="berry-active" class="berry-active" hidden>♥ Berry boost</div>
+    <div id="berry-active" class="berry-active" hidden>✦ Story boost</div>
     <div class="move-area"><button id="wild-battle-button" class="move-button">⚔ Battle</button><button id="attack-button" class="move-button" disabled><span aria-hidden="true">✧</span> Maui Wali <span aria-hidden="true">✧</span></button></div>
-    <p id="throw-hint" class="throw-hint">Swipe the ball up to throw</p>
+    <p id="throw-hint" class="throw-hint">Swipe a woggle up to invite your new friend</p>
 
     <div id="controls" class="controls">
-      <button id="berry-button" class="item-button berry-button" aria-label="Use a berry, 12 remaining" disabled><span class="berry-icon" aria-hidden="true">🍓</span><span id="berry-count" class="item-count">12</span><span class="item-label">BERRY</span></button>
-      <button id="throw-button" class="throw-button" aria-label="Throw a Poké Ball. Swipe up, or press Enter to throw." disabled><span class="ball-sprite" aria-hidden="true"><img src="./assets/balls.webp" alt="" draggable="false"></span></button>
-      <button id="ball-button" class="item-button ball-button" aria-label="Switch to Ultra Ball, 5 remaining" disabled><span class="ball-sprite ultra" aria-hidden="true"><img src="./assets/balls.webp" alt="" draggable="false"></span><span id="ultra-count" class="item-count">5</span><span id="ball-label" class="item-label">ULTRA BALL</span></button>
+      <button id="berry-button" class="item-button berry-button" aria-label="Use a Campfire Story card, 12 remaining" disabled><span class="berry-icon camp-item story" aria-hidden="true"></span><span id="berry-count" class="item-count">12</span><span class="item-label">STORY CARD</span></button>
+      <button id="throw-button" class="throw-button" aria-label="Throw a Trail Woggle. Swipe up, or press Enter to throw." disabled><span class="ball-sprite" aria-hidden="true"><img src="./assets/camp-items.webp" alt="" draggable="false"></span></button>
+      <button id="ball-button" class="item-button ball-button" aria-label="Switch to Golden Woggle, 5 remaining" disabled><span class="ball-sprite ultra" aria-hidden="true"><img src="./assets/camp-items.webp" alt="" draggable="false"></span><span id="ultra-count" class="item-count">5</span><span id="ball-label" class="item-label">GOLDEN WOGGLE</span></button>
     </div>
-    <div id="flying-ball" class="flying-ball" aria-hidden="true"><span class="ball-sprite"><img src="./assets/balls.webp" alt="" draggable="false"></span></div>
+    <div id="flying-ball" class="flying-ball" aria-hidden="true"><span class="ball-sprite"><img src="./assets/camp-items.webp" alt="" draggable="false"></span></div>
 
     <footer class="game-footer"><button id="help-button" class="text-button" aria-label="How to play">How to play</button><button id="sound-button" class="text-button" aria-pressed="false" aria-label="Turn sound on">Sound off</button></footer>
 
     <section id="loader" class="loader" aria-live="polite"><span class="loader-star" aria-hidden="true">✦</span><h2>Opening the woodland…</h2><p>Your next adventure is just down the trail.</p><button id="retry-button" class="primary-button" hidden>Try again</button></section>
 
-    <dialog id="result-dialog" class="result-dialog"><form method="dialog"><span id="result-eyebrow" class="eyebrow">A NEW TRAIL COMPANION</span><h2>Gotcha!</h2><p id="result-subtitle" class="result-subtitle">PartyPoss was caught.</p><div id="result-art" class="portrait-medallion"></div><div id="result-name" class="result-name">PartyPoss <span>CP 420</span></div><div class="result-stats"><div><strong id="result-xp">170</strong><span>XP earned</span></div><div><strong id="result-quality">Great</strong><span>Throw</span></div></div><p id="catch-rewards" class="reward-note">+2 berries · +1 Ultra Ball</p><button id="next-button" class="primary-button" value="next">Back to the trail <span aria-hidden="true">→</span></button></form></dialog>
+    <dialog id="result-dialog" class="result-dialog"><form method="dialog"><span id="result-eyebrow" class="eyebrow">A NEW TRAIL COMPANION</span><h2>Welcome to the patrol!</h2><p id="result-subtitle" class="result-subtitle">PartyPoss joined your patrol.</p><div id="result-art" class="portrait-medallion"></div><div id="result-name" class="result-name">PartyPoss <span>CP 420</span></div><div class="result-stats"><div><strong id="result-xp">170</strong><span>XP earned</span></div><div><strong id="result-quality">Great</strong><span>Throw</span></div></div><p id="catch-rewards" class="reward-note">+2 story cards · +1 Golden Woggle</p><button id="next-button" class="primary-button" value="next">Back to the trail <span aria-hidden="true">→</span></button></form></dialog>
 
     <dialog id="journal-dialog" class="sheet-dialog"><button class="close-button" data-close="journal-dialog" aria-label="Close journal">×</button><span class="eyebrow">YOUR LITTLE COLLECTION</span><h2>Catch journal</h2><div class="journal-summary"><div><strong id="journal-caught">0</strong><span>Critters caught</span></div><div><strong id="journal-xp">0</strong><span>Total XP</span></div></div><p id="journal-empty">Your first trail friend is waiting in the meadow.</p><ol id="journal-list" class="journal-list"></ol><p class="small-note">Saved on this device.</p></dialog>
 
-    <dialog id="help-dialog" class="sheet-dialog"><button class="close-button" data-close="help-dialog" aria-label="Close instructions">×</button><span class="eyebrow">YOUR FIELD NOTES</span><h2>A woodland adventure</h2><ol class="instructions"><li><strong>Explore and collect.</strong><span>Visit each trail and find its patrol critters. Swipe up from the ball, or tap it to throw. Berries and Ultra Balls improve your chances.</span></li><li><strong>Build your patrol.</strong><span>Take three critters into battle. Basic attacks and Guard build energy. At 3 energy, unleash a special move. A wild battle makes the catch easier.</span></li><li><strong>Earn your badges.</strong><span>Beat each trail’s trial to open the next habitat. Collect all eight patrol animals and all three badges to meet PartyPoss at the Great Oak.</span></li><li><strong>Come back to camp.</strong><span>Rest for free, buy supplies, train your critters, and claim ticket rewards. Your adventure saves on this device.</span></li></ol><p class="help-keyboard">Type advantages: Fire → Grass → Earth → Air → Water → Fire. Fairy is neutral. In encounters: Space to throw · B berry · U switch ball · M Maui Wali.</p><p class="small-note">AR uses a live camera background. The camera icon saves a photo. After a full first visit, the game also works offline.</p><button class="primary-button" data-close="help-dialog">Back to the adventure</button><p class="fan-note">An independent fan game. Not affiliated with Scouting America or Pokémon. No real location is required.</p></dialog>
+    <dialog id="help-dialog" class="sheet-dialog"><button class="close-button" data-close="help-dialog" aria-label="Close instructions">×</button><span class="eyebrow">YOUR FIELD NOTES</span><h2>A woodland adventure</h2><ol class="instructions"><li><strong>Explore and collect.</strong><span>Open the walking map and allow location, or choose the practice grove. Meet critters within 80 m. Swipe or tap a Trail Woggle to invite a friend; Story cards and Golden Woggles build trust.</span></li><li><strong>Build your patrol.</strong><span>Take three critters into battle. Basic attacks and Guard build energy. At 3 energy, unleash a special move. A wild battle makes the catch easier.</span></li><li><strong>Earn your badges.</strong><span>Beat each trail’s trial to open the next habitat. Collect all eight patrol animals and all three badges to meet PartyPoss at the Great Oak.</span></li><li><strong>Discover places nearby.</strong><span>Spin supply stops within 80 m for camp items, then challenge Patrol Lodges for medals. Stops restock every 5 minutes. Open the book icon for the original trail campaign. Rest your patrol at Camp for free.</span></li></ol><p class="help-keyboard">Type advantages: Fire → Grass → Earth → Air → Water → Fire. Fairy is neutral. In encounters: Space to offer · B story card · U switch woggle · M Maui Wali.</p><p class="small-note">AR uses a live camera background. The camera icon saves a photo. The practice grove and trail book work offline after a full first visit. Live maps need internet access. Stop walking before interacting.</p><button class="primary-button" data-close="help-dialog">Back to the adventure</button><p class="fan-note">An independent fan game. Not affiliated with Scouting America or Pokémon. Location is optional; choose the practice grove to play without GPS.</p></dialog>
 
     <section id="world-screen" class="world-screen" aria-label="Woodland adventure">
       <header class="world-header"><div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><div><span class="brand-kicker">WOODLAND</span><h1>Critter Quest</h1></div></div><div class="header-actions"><span class="coin-counter" aria-label="Trail coins"><span aria-hidden="true">◈</span> <b id="coin-count">120</b></span><button id="camp-button" class="camp-button">Camp</button></div></header>
       <div id="world-content" class="world-content"></div>
-      <nav class="world-nav" aria-label="Adventure"><button data-tab="trail" aria-current="page"><span aria-hidden="true">⌁</span>Trail</button><button data-tab="patrol"><span aria-hidden="true">♧</span>Patrol</button><button data-tab="guide"><span aria-hidden="true">▤</span>Guide</button><button data-tab="tickets"><span aria-hidden="true">⚑</span>Tickets</button></nav>
+      <nav class="world-nav" aria-label="Adventure"><button data-tab="map" aria-current="page"><span aria-hidden="true">⌁</span>Map</button><button data-tab="patrol"><span aria-hidden="true">♧</span>Patrol</button><button data-tab="guide"><span aria-hidden="true">▤</span>Guide</button><button data-tab="tickets"><span aria-hidden="true">⚑</span>Tickets</button></nav>
     </section>
     <section id="battle-screen" class="battle-screen" hidden aria-label="Critter battle"></section>
     <div id="world-toast" class="world-toast" role="status" aria-live="polite"></div>
@@ -81,6 +83,7 @@
     <dialog id="battle-result" class="adventure-dialog"></dialog>
   </main>
   <aside class="rotate-hint"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="20" y="8" width="25" height="46" rx="5"/><path d="M28 47h9M8 23a25 25 0 0 1 4-10m-8 1 8-1 2 8M56 41a25 25 0 0 1-4 10m8-1-8 1-2-8"/></svg><h2>A little more room for magic</h2><p>Turn your phone upright to play.</p></aside>
+  <script src="./vendor/leaflet/leaflet.js"></script>
   <script type="module" src="./game.js"></script>
   <script type="module" src="./adventure.js"></script>
 </body>
