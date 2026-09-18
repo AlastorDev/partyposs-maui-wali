@@ -22,9 +22,9 @@ Use case: background-extraction. Asset type: transparent PNG 3:1 horizontal thre
 
 Use case: precise-object-edit. Asset type: background-only portrait 9:16 image for a phone web catching game. Input image 1 is the edit target and the exact scene to preserve. Extract a clean empty background from this second encounter image, preserving its sunny blue sky, lush leafy trees, distant mountain lake, green wildflower meadow and brown earth path at the creature's feet. Preserve the reference's camera viewpoint, background spatial layout, ground horizon, lighting, depth of field and polished 3D storybook rendering. Remove the entire central PartyPoss creature including its hair, hat, glasses, medal, limbs and curled tail. Remove ALL UI, text, status bars, phone indicators, buttons, icons, balls, berry icons, target rings and overlays. Remove every floating cannabis leaf, floating plumeria flower, confetti piece, sparkle, magical ribbon and light swirl. Naturally inpaint the sky, trees, lake, meadow and path behind these removed elements, matching adjacent textures and perspective. Leave the center unobstructed so a character sprite can later be placed there. Keep flowers growing naturally in the meadow. No creatures, people, added objects, floating effects, text, logos, UI or watermark. Background only, no transparency needed.
 
-# Wood Badge expansion
+# Woodland expansion
 
-Built-in image generation, using PartyPoss as the style reference. The patrol animal set follows the eight traditional Wood Badge patrols: [Scouting America, Connecticut Yankee Council](https://www.ctyankee.org/woodbadge/after_the_course/). These are original game characters, not official Scouting artwork.
+Built-in image generation, using PartyPoss as the style reference. Animal roster reference: [Scouting America, Connecticut Yankee Council](https://www.ctyankee.org/woodbadge/after_the_course/). These are original game characters, not official Scouting artwork.
 
 ## critters-a
 

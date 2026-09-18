@@ -430,7 +430,7 @@ $('photo-button').addEventListener('click',async()=>{
   photo.drawImage(canvas,0,0,w,h);
   roundedBox(photo,w*.13,h*.12,w*.74,95,46,'#163c60cb');
   photo.textAlign='center';photo.fillStyle='white';photo.font='600 34px system-ui';photo.fillText(`${species.name}  /  Lv ${encounter.level}`,w/2,h*.12+42);
-  photo.fillStyle='#d5e6ee';photo.font='22px system-ui';photo.fillText(encounter.species==='partyposs'?'A Birthday Every Day':'Wood Badge · Critter Quest',w/2,h*.12+74);
+  photo.fillStyle='#d5e6ee';photo.font='22px system-ui';photo.fillText(encounter.species==='partyposs'?'A Birthday Every Day':'Woodland · Critter Quest',w/2,h*.12+74);
   if(phase==='attacking'){roundedBox(photo,35,h*.78,w-70,55,27,'#20372cbd');photo.font='600 23px system-ui';photo.fillStyle='#eac1ff';photo.fillText('✦ PartyPoss used Maui Wali! ✦',w/2,h*.78+36);}
   output.toBlob(async blob=>{
     if(!blob){message('Couldn’t save the photo. Please try again.');return;}

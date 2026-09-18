@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#173b49">
-  <meta name="description" content="Explore the Wood Badge trails. Catch eight patrol critters, train your team, earn badges, and discover PartyPoss and Maui Wali.">
+  <meta name="description" content="Explore the Woodland trails. Catch eight patrol critters, train your team, earn badges, and discover PartyPoss and Maui Wali.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Wood Badge · Critter Quest</title>
+  <title>Woodland · Critter Quest</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23173b49'/%3E%3Cpath d='M18 47 32 9 47 47Z' fill='%234581ed'/%3E%3Ccircle cx='32' cy='10' r='7' fill='%23ffd773'/%3E%3Cpath d='m28 29 9 2m-13 7 16 4' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="./assets/icon.png">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -16,7 +16,7 @@
   <link rel="preload" as="image" href="./assets/meadow.webp">
 </head>
 <body>
-  <main id="game" class="game" data-phase="loading" data-screen="world" aria-label="Wood Badge Critter Quest">
+  <main id="game" class="game" data-phase="loading" data-screen="world" aria-label="Woodland Critter Quest">
     <div class="scenery" aria-hidden="true"></div>
     <video id="camera-feed" class="camera-feed" muted playsinline aria-hidden="true"></video>
     <div class="scene-shade" aria-hidden="true"></div>
@@ -69,8 +69,8 @@
 
     <dialog id="help-dialog" class="sheet-dialog"><button class="close-button" data-close="help-dialog" aria-label="Close instructions">×</button><span class="eyebrow">YOUR FIELD NOTES</span><h2>A woodland adventure</h2><ol class="instructions"><li><strong>Explore and collect.</strong><span>Visit each trail and find its patrol critters. Swipe up from the ball, or tap it to throw. Berries and Ultra Balls improve your chances.</span></li><li><strong>Build your patrol.</strong><span>Take three critters into battle. Basic attacks and Guard build energy. At 3 energy, unleash a special move. A wild battle makes the catch easier.</span></li><li><strong>Earn your badges.</strong><span>Beat each trail’s trial to open the next habitat. Collect all eight patrol animals and all three badges to meet PartyPoss at the Great Oak.</span></li><li><strong>Come back to camp.</strong><span>Rest for free, buy supplies, train your critters, and claim ticket rewards. Your adventure saves on this device.</span></li></ol><p class="help-keyboard">Type advantages: Fire → Grass → Earth → Air → Water → Fire. Fairy is neutral. In encounters: Space to throw · B berry · U switch ball · M Maui Wali.</p><p class="small-note">AR uses a live camera background. The camera icon saves a photo. After a full first visit, the game also works offline.</p><button class="primary-button" data-close="help-dialog">Back to the adventure</button><p class="fan-note">An independent fan game. Not affiliated with Scouting America or Pokémon. No real location is required.</p></dialog>
 
-    <section id="world-screen" class="world-screen" aria-label="Wood Badge adventure">
-      <header class="world-header"><div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><div><span class="brand-kicker">WOOD BADGE</span><h1>Critter Quest</h1></div></div><div class="header-actions"><span class="coin-counter" aria-label="Trail coins"><span aria-hidden="true">◈</span> <b id="coin-count">120</b></span><button id="camp-button" class="camp-button">Camp</button></div></header>
+    <section id="world-screen" class="world-screen" aria-label="Woodland adventure">
+      <header class="world-header"><div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><div><span class="brand-kicker">WOODLAND</span><h1>Critter Quest</h1></div></div><div class="header-actions"><span class="coin-counter" aria-label="Trail coins"><span aria-hidden="true">◈</span> <b id="coin-count">120</b></span><button id="camp-button" class="camp-button">Camp</button></div></header>
       <div id="world-content" class="world-content"></div>
       <nav class="world-nav" aria-label="Adventure"><button data-tab="trail" aria-current="page"><span aria-hidden="true">⌁</span>Trail</button><button data-tab="patrol"><span aria-hidden="true">♧</span>Patrol</button><button data-tab="guide"><span aria-hidden="true">▤</span>Guide</button><button data-tab="tickets"><span aria-hidden="true">⚑</span>Tickets</button></nav>
     </section>

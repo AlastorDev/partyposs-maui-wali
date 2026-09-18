@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "A complete Wood Badge critter adventure with catching, patrol battles, trials, and PartyPoss.",
+  "description": "A complete Woodland critter adventure with catching, patrol battles, trials, and PartyPoss.",
   "scripts": {
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/core.test.mjs tests/world.test.mjs",

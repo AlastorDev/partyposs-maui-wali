@@ -1,12 +1,12 @@
-# Wood Badge · Critter Quest
+# Woodland · Critter Quest
 
-A complete phone-friendly creature-collecting adventure inspired by Wood Badge patrols and the supplied PartyPoss references.
+A complete phone-friendly creature-collecting adventure featuring woodland animals and the supplied PartyPoss references.
 
 ## Play
 
 [Play Critter Quest](https://alastordev.github.io/partyposs-maui-wali/)
 
-Choose Beaver, Bobwhite, or Fox as your starter. Explore Lakeside Lodge, Whispering Pines, and Sunrise Ridge to collect all eight Wood Badge patrol animals: Beaver, Bobwhite, Eagle, Fox, Owl, Bear, Buffalo, and Antelope.
+Choose Beaver, Bobwhite, or Fox as your starter. Explore Lakeside Lodge, Whispering Pines, and Sunrise Ridge to collect all eight woodland critters: Beaver, Bobwhite, Eagle, Fox, Owl, Bear, Buffalo, and Antelope.
 
 - Swipe or tap to catch wild critters. Regular balls are unlimited; berries, Ultra Balls, and winning a wild battle improve the odds. A third successful hit guarantees a catch.
 - Build a patrol of up to three critters. Battle with basic moves, energy-powered specials, Guard, tonics, and teammate swaps. Each species has its own moves and elemental type.
@@ -32,6 +32,6 @@ The game is served at `http://127.0.0.1:4173`. All publishable files are in `dis
 
 ## Art and attribution
 
-Based on two PartyPoss images supplied by the user, with eight original patrol critter illustrations and a new woodland map. Assets were prepared with the built-in image-generation tool. Final asset paths, prompts, and provenance are documented in [ARTWORK.md](ARTWORK.md). The animal roster follows the traditional Wood Badge patrols. This is an independent fan game with no affiliation with Scouting America, Pokémon, Nintendo, Game Freak, Creatures, or Niantic. Pokémon and Poké Ball imagery belong to their respective owners.
+Based on two PartyPoss images supplied by the user, with eight original patrol critter illustrations and a new woodland map. Assets were prepared with the built-in image-generation tool. Final asset paths, prompts, and provenance are documented in [ARTWORK.md](ARTWORK.md). This is an independent fan game with no affiliation with Scouting America, Pokémon, Nintendo, Game Freak, Creatures, or Niantic. Pokémon and Poké Ball imagery belong to their respective owners.
 
 No login, location collection, analytics, server, or paid API is required. Camera access stays on the device and stops when the page is hidden. Local progress is device-specific.

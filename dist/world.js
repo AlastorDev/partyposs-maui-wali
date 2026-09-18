@@ -22,7 +22,7 @@ export const TICKETS = [
   {id:'friends',name:'A patrol of your own',detail:'Collect 3 different patrol critters.',goal:3,reward:100,progress:p=>patrolCount(p)},
   {id:'practice',name:'Learning by doing',detail:'Win 3 battles on the trails.',goal:3,reward:150,progress:p=>p.wins},
   {id:'training',name:'Bring out their best',detail:'Train a critter to level 10.',goal:10,reward:200,progress:p=>Math.max(0,...p.roster.map(u=>u.level))},
-  {id:'collection',name:'The whole woodland',detail:'Collect all 8 Wood Badge patrol critters.',goal:8,reward:300,progress:p=>patrolCount(p)},
+  {id:'collection',name:'The whole woodland',detail:'Collect all 8 woodland critters.',goal:8,reward:300,progress:p=>patrolCount(p)},
   {id:'trials',name:'A good old critter, too',detail:'Earn all 3 trail badges.',goal:3,reward:300,progress:p=>p.badges.length}
 ];
 export const SHOP = {berries:{name:'Berry',price:25,amount:3,detail:'Three treats for easier catches.',icon:'🍓'},ultras:{name:'Ultra Ball',price:60,amount:2,detail:'Two balls with a better catch chance.',icon:'◉'},potions:{name:'Trail tonic',price:35,amount:2,detail:'Two tonics. Restore 60% health in battle.',icon:'✚'}};
